@@ -10,15 +10,34 @@ from datetime import datetime
 import csv
 import os
 import sys
+import re
 
+def make_filename_safe(filename):
+    """
+    Remove or replace unsafe characters from filename.
+    """
+    # Remove any characters that are not allowed in file names
+    filename = re.sub(r'[^\w\-_. ]', '', filename)
+    # Replace spaces with underscores
+    filename = filename.replace(' ', '_')
+    return filename
 
 def ping(host, count=1):
-    cmd = ['ping', '-c', str(count), host]
-    output = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
-    ping_parser = pingparsing.PingParsing()
-    result = ping_parser.parse(output.stdout)
-    return result.rtt_avg
-
+    try:
+        rtt_avg = None
+        while not isinstance(rtt_avg, float):
+            cmd = ['ping', '-c', str(count), host]
+            output = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+            ping_parser = pingparsing.PingParsing()
+            result = ping_parser.parse(output.stdout)
+            rtt_avg = result.rtt_avg
+            if not isinstance(rtt_avg, float):
+                print("Error during ping. Retrying...")
+                time.sleep(1)
+        return rtt_avg
+    except Exception as e:
+        print(f"Error fetching IP information: {e}. Exiting...")
+        sys.exit(0)
 
 def get_ip_info():
     try:
@@ -42,7 +61,6 @@ def append_to_csv(time, latency, filename):
             writer.writeheader()
         writer.writerow({'time': time, 'latency': latency})
 
-
 def set_dark_mode():
     plt.style.use('dark_background')
     plt.rcParams['axes.edgecolor'] = 'gray'
@@ -50,7 +68,6 @@ def set_dark_mode():
     plt.rcParams['ytick.color'] = 'white'
     plt.rcParams['grid.color'] = 'gray'
     plt.rcParams['figure.facecolor'] = 'black'
-
 
 def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, fig_height=6):
     if dark_mode:
@@ -67,10 +84,13 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
 
     ip, hostname = get_ip_info()
 
+    # Make hostname safe for use in file names
+    safe_hostname = make_filename_safe(hostname)
+
     # Set the CSV and image file names
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    csv_filename = f"output/ping_data_{timestamp}.csv"
-    img_filename = f"output/ping_plot_{timestamp}.png"
+    csv_filename = f"output/ping_data_{safe_hostname}_{timestamp}.csv"
+    img_filename = f"output/ping_plot_{safe_hostname}_{timestamp}.png"
 
     # Create the output directory if it doesn't exist
     output_dir = "output"
@@ -78,6 +98,7 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
         os.makedirs(output_dir)
     try:
         while current_time - start_time < duration:
+            
             latency = ping(host)
             latencies.append(latency)
             times.append(current_time - start_time)
@@ -114,6 +135,10 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
     except KeyboardInterrupt:
         print("Program interrupted by user. Exiting...")
         sys.exit(0)
+
+    except Exception as e:
+        # handle the exception
+        print("An exception occurred:", e)
 
     finally:
         print(f"Finished! Plot saved to {img_filename} and data saved to {csv_filename}")
