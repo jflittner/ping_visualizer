@@ -71,6 +71,11 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
     csv_filename = f"output/ping_data_{timestamp}.csv"
     img_filename = f"output/ping_plot_{timestamp}.png"
 
+    # Create the output directory if it doesn't exist
+    output_dir = "output"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     while current_time - start_time < duration:
         latency = ping(host)
         latencies.append(latency)
