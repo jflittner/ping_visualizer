@@ -2,6 +2,8 @@
 
 Ping Visualizer is a simple Python script that displays ping latency over time in a graphical format. It also saves the ping data to a CSV file and generates a PNG image of the plot.
 
+![Ping Plot](/examples/ping_plot_20230423_102651.png)
+
 ## Installation
 
 1. Clone the repository to your local machine:
