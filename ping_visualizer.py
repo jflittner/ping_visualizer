@@ -9,6 +9,7 @@ from ipwhois import IPWhois
 from datetime import datetime
 import csv
 import os
+import sys
 
 
 def ping(host, count=1):
@@ -75,41 +76,48 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
     output_dir = "output"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    try:
+        while current_time - start_time < duration:
+            latency = ping(host)
+            latencies.append(latency)
+            times.append(current_time - start_time)
 
-    while current_time - start_time < duration:
-        latency = ping(host)
-        latencies.append(latency)
-        times.append(current_time - start_time)
+            current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            title = f"Ping Latency: {host} - {current_datetime}"
+            title += f"\nISP: {hostname}"
 
-        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        title = f"Ping Latency: {host} - {current_datetime}"
-        title += f"\nISP: {hostname}"
+            ax.clear()
+            ax.plot(times, latencies)
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel('Latency (ms)')
 
-        ax.clear()
-        ax.plot(times, latencies)
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Latency (ms)')
+            min_latency = min(latencies)
+            max_latency = max(latencies)
+            avg_latency = sum(latencies) / len(latencies)
+            jitter = sum([abs(latencies[i] - latencies[i - 1]) for i in range(1, len(latencies))]) / (len(latencies) - 1) if len(latencies) > 1 else 0
+            title += f"\nMin: {min_latency:.2f} ms, Max: {max_latency:.2f} ms, Avg: {avg_latency:.2f} ms, Jitter: {jitter:.2f} ms"
 
-        min_latency = min(latencies)
-        max_latency = max(latencies)
-        avg_latency = sum(latencies) / len(latencies)
-        jitter = sum([abs(latencies[i] - latencies[i - 1]) for i in range(1, len(latencies))]) / (len(latencies) - 1) if len(latencies) > 1 else 0
-        title += f"\nMin: {min_latency:.2f} ms, Max: {max_latency:.2f} ms, Avg: {avg_latency:.2f} ms, Jitter: {jitter:.2f} ms"
+            ax.set_title(title)
+            plt.pause(interval)
+            current_time = time.time()
+            
+            # Append data to the CSV file
+            append_to_csv(times[-1], latencies[-1], csv_filename)
 
-        ax.set_title(title)
-        plt.pause(interval)
-        current_time = time.time()
-        
-        # Append data to the CSV file
-        append_to_csv(times[-1], latencies[-1], csv_filename)
+            # Save the plot as a PNG image
+            plt.savefig(img_filename)
 
-        # Save the plot as a PNG image
-        plt.savefig(img_filename)
+        print(f"Close the plot window to exit the program")
+        plt.ioff()
+        plt.show()
 
-    plt.ioff()
-    plt.show()
+    except KeyboardInterrupt:
+        print("Program interrupted by user. Exiting...")
+        sys.exit(0)
 
-    print(f"Data saved to {csv_filename}")
+    finally:
+        print(f"Finished! Plot saved to {img_filename} and data saved to {csv_filename}")
+        sys.exit(0)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Visualize ping latency over time.')
