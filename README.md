@@ -35,7 +35,7 @@ pip install -r requirements.txt
 Run the script with the following command:
 
 ```
-python ping_visualizer.py <host>
+python ping_visualizer.py --dark_mode <host>
 ```
 
 ## Optional Arguments
@@ -51,7 +51,7 @@ python ping_visualizer.py <host>
 Example:
 
 ```
-python ping_visualizer.py google.com -i 2 -d 120 -m
+python ping_visualizer.py google.com -i 2 -d 120 -w 7 -ht 5 --dark_mode
 ```
 
 This command will visualize the ping latency to `google.com` with a 2-second interval between pings, a total duration of 120 seconds, and dark mode enabled.

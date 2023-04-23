@@ -68,8 +68,8 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
 
     # Set the CSV and image file names
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    csv_filename = f"ping_data_{timestamp}.csv"
-    img_filename = f"ping_plot_{timestamp}.png"
+    csv_filename = f"output/ping_data_{timestamp}.csv"
+    img_filename = f"output/ping_plot_{timestamp}.png"
 
     while current_time - start_time < duration:
         latency = ping(host)
