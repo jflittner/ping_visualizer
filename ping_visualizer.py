@@ -41,7 +41,6 @@ def ping(host, count=1):
 def get_ip_info():
     try:
         response = requests.get('https://ipinfo.io/json')
-        print(response.json())
         data = response.json()
 
         ip = data.get('ip', None)
@@ -75,7 +74,14 @@ def set_dark_mode():
     plt.rcParams['grid.color'] = 'gray'
     plt.rcParams['figure.facecolor'] = 'black'
 
+def on_close(event):
+    print("Plot window closed. Exiting")
+    sys.exit(0)
+
 def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, fig_height=6):
+    
+    print(f"Running, use Ctrl-c or close the plot to exit the program")
+    
     if dark_mode:
         set_dark_mode()
 
@@ -87,6 +93,8 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
 
     plt.ion()
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+
+    fig.canvas.mpl_connect('close_event', on_close)
 
     ip, hostname = get_ip_info()
 
