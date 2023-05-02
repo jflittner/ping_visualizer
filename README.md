@@ -67,5 +67,4 @@ The script will save the ping data to a CSV file (`ping_data_<timestamp>.csv`) a
 - Python 3.x
 - matplotlib
 - pingparsing
-- requests
-- ipwhois
+- requests 
