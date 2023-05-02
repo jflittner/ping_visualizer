@@ -1,4 +1,3 @@
 pingparsing
 matplotlib
 requests
-ipwhois

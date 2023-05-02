@@ -5,7 +5,6 @@ import pingparsing
 import matplotlib.pyplot as plt
 import time
 import requests
-from ipwhois import IPWhois
 from datetime import datetime
 import csv
 import os
@@ -41,11 +40,18 @@ def ping(host, count=1):
 
 def get_ip_info():
     try:
-        ip = requests.get('https://api.ipify.org').text
-        ipwhois = IPWhois(ip)
-        lookup = ipwhois.lookup_rdap()
-        hostname = lookup.get('asn_description')
-        return ip, hostname
+        response = requests.get('https://ipinfo.io/json')
+        print(response.json())
+        data = response.json()
+
+        ip = data.get('ip', None)
+        hostname = data.get('org', None) or data.get('hostname', ip)
+
+        if ip and hostname:
+            return ip, hostname
+        else:
+            print("Error fetching IP information: IP or hostname not found")
+            return None, None
     except Exception as e:
         print(f"Error fetching IP information: {e}")
         return None, None
