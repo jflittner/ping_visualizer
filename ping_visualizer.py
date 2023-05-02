@@ -21,7 +21,7 @@ def make_filename_safe(filename):
     filename = filename.replace(' ', '_')
     return filename
 
-def ping(host, count=1):
+def ping(host, count=2):
     try:
         rtt_avg = None
         while not isinstance(rtt_avg, float):
