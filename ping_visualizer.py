@@ -87,6 +87,7 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
 
     latencies = []
     times = []
+    last_latency = None
 
     start_time = time.time()
     current_time = start_time
@@ -117,6 +118,8 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
             latencies.append(latency)
             times.append(current_time - start_time)
 
+            last_latency = latency if latency is not None else last_latency  # Update the last latency
+
             current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             title = f"Ping Latency: {host} - {current_datetime}"
             title += f"\nISP: {hostname}"
@@ -130,7 +133,7 @@ def visualize_ping(host, interval=1, duration=60, dark_mode=False, fig_width=8, 
             max_latency = max(latencies)
             avg_latency = sum(latencies) / len(latencies)
             jitter = sum([abs(latencies[i] - latencies[i - 1]) for i in range(1, len(latencies))]) / (len(latencies) - 1) if len(latencies) > 1 else 0
-            title += f"\nMin: {min_latency:.2f} ms, Max: {max_latency:.2f} ms, Avg: {avg_latency:.2f} ms, Jitter: {jitter:.2f} ms"
+            title += f"\nMin: {min_latency:.2f}, Max: {max_latency:.2f}, Avg: {avg_latency:.2f}, Jitter: {jitter:.2f}, Last: {last_latency:.2f}"
 
             ax.set_title(title)
             plt.pause(interval)
